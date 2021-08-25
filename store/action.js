@@ -2,7 +2,6 @@ export const GET_VOCABOLARIES = 'GET_VOCABOLARIES';
 export const GET_SETTINGS = 'GET_SETTINGS';
 export const DEVICEIFNO = 'DEVICEIFNO';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { app } from '../firebase';
 import { getAndroidId } from 'react-native-device-info';
 
 
@@ -10,10 +9,10 @@ export const settings = () => {
     return async dispatch => {
         try {
             const res = await AsyncStorage.getItem('settings');
-            JSON.parse(res)
+            const data=JSON.parse(res)
             dispatch({
                 type: GET_SETTINGS,
-                payload: JSON.parse(res)
+                payload: data
             })
         } catch (e) {
             console.log('note get 17')

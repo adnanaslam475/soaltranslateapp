@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  SafeAreaView,
   Text,
   View,
   Alert,
@@ -10,36 +9,39 @@ import {
   Dimensions,
   Animated,
   ActivityIndicator,
+  TouchableHighlight
 } from 'react-native';
+import { Dialog, Input } from 'react-native-elements';
 import { styles } from '../styles';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import KeyboardStickyView from 'rn-keyboard-sticky-view';
 import McIcon from 'react-native-vector-icons/MaterialCommunityIcons'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from '@react-native-picker/picker';
 import Voice from '@react-native-community/voice';
 import axios from 'axios';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Languages from '../translation.json';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 
 const Speech = (props) => {
   const scrollref = useRef(null);
-  const state=useSelector(s=>s.reducer)
+  const state = useSelector(s => s.reducer)
+  const [open, setopen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [start, setStart] = useState(false);
   const [error, setError] = useState('');
   const [languageCode, setLanguageCode] = useState('')
-  const [translations, setTranslations] = useState([{ "position": "right", "text": "Hana hakika" },
-  { "position": "left", "text": "Has no doubt" }])
+  const [translations, setTranslations] = useState([])
   const [end, setEnd] = useState('');
   const [text, setText] = useState('');
   const [to, setTo] = useState('');
   const [fullwidth, setfullwidth] = useState(false);
-  const [from, setfrom] = useState('')
-  const [background, setbackground] = useState('')
+  const [from, setfrom] = useState('');
+  const [lanugageModal, setlanguageModal] = useState(false)
   const [update, setUpdate] = useState(false);
-  const [empty, setempty] = useState(false);
+  const [msg, setmsg] = useState('');
   const [anim, setanim] = useState(new Animated.Value(180))
 
   useEffect(() => {
@@ -74,12 +76,14 @@ const Speech = (props) => {
 
   const startRecognizing = async () => {
     try {
+      // en-US
       await Voice.start('en-US'); //yahn pr device language aegi
       setError('');
       setEnd('');
       setStart(true)
     } catch (e) {
-      console.error('err78');
+      Alert.alert("ERROR!!!", 'please check permissions',
+        [{ text: "OK" }]);
     }
   };
 
@@ -100,40 +104,28 @@ const Speech = (props) => {
       setLoading(true);
       let obj = { text, position: 'right' }
       setTranslations(p => [...p, obj])
-      let en = from || 'en';
-      axios.get(`https://lanugaetransltor.herokuapp.com/tasks?input=${text}&from=sw&to=en`,
+      axios.get(`https://lanugaetransltor.herokuapp.com/tasks?input=${text}&from=${from}&to=${to}`,
         {
           headers: { 'Content-Type': 'application/json' }
-        }).then(res => {
-          console.log(res.data.ress)
+        }).then(({data}) => {
+          console.log(data.ress)
           setLoading(false);
-          const obj = { text: res.data.ress, position: 'left' };
+          const obj = {
+            text: data.ress,
+            position: 'left'
+          };
           setTranslations(p => [...p, obj])
         }).catch(e => {
           Alert.alert("ERROR!!!", "Cannot Translate...", [{ text: "OK" }]);
           setLoading(false)
         })
       scrollref.current.scrollToEnd({ animated: true })
+      setText('')
     }
     else {
-      setempty(true)
+      setmsg('please enter text')
     }
   }
-
-  console.log(translations)
-
-
-  // const destroyRecognizer = async () => {
-  //   //Destroys the current SpeechRecognizer instance
-  //   try {
-  //     await Voice.destroy();
-  //     setError('');
-  //     setEnd('');
-  //   } catch (e) {
-  //     //eslint-disable-next-line
-  //     console.error(e);
-  //   }
-  // };
 
   const saveLanguage = async lang => {
     try {
@@ -141,53 +133,101 @@ const Speech = (props) => {
       await AsyncStorage.setItem('lang', jsonValue);
       setUpdate(!update)
     }
-    catch (error) {
+    catch (e) {
       console.log('cannto set 135');
       Alert.alert("ERROR!!!", "Cannot save...", [{ text: "OK" }]);
     }
   }
 
-  const animationWidth = a => {
-    if (a) {
-      Animated.timing(this.state.animationValue, {
-        toValue: 300,
-        timing: 1500
-      }).start(() => {
-        this.setState({ viewState: false })
-      });
-    }
-    else {
-      Animated.timing(this.state.animationValue, {
-        toValue: 180,
-        timing: 1500
-      }).start(this.setState({ viewState: true })
-      );
-    }
-  }
+  // const animationWidth = a => {
+  //   if (a) {
+  //     Animated.timing(this.state.animationValue, {
+  //       toValue: 300,
+  //       timing: 1500
+  //     }).start(() => {
+  //       this.setState({ viewState: false })
+  //     });
+  //   }
+  //   else {
+  //     Animated.timing(this.state.animationValue, {
+  //       toValue: 180,
+  //       timing: 1500
+  //     }).start(this.setState({ viewState: true })
+  //     );
+  //   }
+  // }
 
   return (
     <>
-      <ScrollView ref={scrollref}style={{
+      <ScrollView ref={scrollref} style={{
         ...styles.scroll,
         flex: 1,
         width: width,
         backgroundColor: state.settings?.color,
       }}>
-        {from || to ? <Picker
-          style={styles.picker}
-          selectedValue={languageCode}
-          onValueChange={lang => { saveLanguage(lang) }} >
-          {Object.keys(Languages).map((key, i) => {
-            return (<Picker.Item key={i} label={Languages[key]} value={key} />)
-          })}
-        </Picker> : null}
+        <Dialog
+          visible={open}
+          hardwareAccelerated={true}
+          animated={true}
+          animationType='fade'
+          overlayStyle={{ width: width * 0.9 }}
+          onBackdropPress={() => setopen(false)}>
+          <View style={{ flexDirection: 'row' }}>
+            <Input placeholder='Enter Text..'
+              style={{ ...styles.mpzero }}
+              maxLength={30}
+              onChangeText={t => {setText(t);setmsg('')}} value={text} />
+            <TouchableHighlight onPress={start === false ? startRecognizing : stopRecognizing}>
+              <FontAwesome name='microphone'
+                color={start === false ? 'blue' : 'green'} size={width * 0.1} />
+            </TouchableHighlight>
+          </View>
+          {msg?<Text style={{...styles.err}}>{msg}</Text>:null}
+          <TouchableOpacity style={{
+            ...styles.btn,
+            width: width * 0.4
+          }}
+            onPress={send}>
+            <Text style={{ color: 'white' }}>Translate</Text>
+          </TouchableOpacity>
+        </Dialog>
+        <Dialog visible={lanugageModal} animationType='fade'
+          onBackdropPress={() => setlanguageModal(false)} >
+          <Picker
+            style={{
+              ...styles.picker, borderWidth: 2, borderColor: 'black',
+              width: 190,
+            }}
+
+            selectedValue={languageCode}
+            onValueChange={lang => { saveLanguage(lang); setfrom(lang) }} >
+            {Object.keys(Languages).map((key, i) => {
+              // const arr = Object.values(Languages).filter(v => v[key])
+              return (<Picker.Item key={i} style={{ borderWidth: 2 }}
+                label={Languages[key]} value={key} />)
+            })}
+          </Picker>
+          <Picker
+            style={{
+              ...styles.picker, borderWidth: 2, borderColor: 'black',
+              width: 190,
+            }}
+            selectedValue={languageCode}
+            onValueChange={lang => { saveLanguage(lang); setTo(lang) }} >
+            {Object.keys(Languages).map((key, i) => {
+              // const arr = Object.values(Languages).filter(v => v[key])
+              return (<Picker.Item key={i} style={{ borderWidth: 2 }}
+                label={Languages[key]} value={key} />)
+            })}
+          </Picker>
+        </Dialog>
         {translations ? translations.map((v, i) => (<View style={{
           ...styles.marginLeft,
           alignItems: v.position == 'right' ? 'flex-end' : 'flex-start'
         }} key={i}>
           <View style={{ flexDirection: 'column' }} >
             {v?.text ? <View style={styles.txtvw} >
-              <Text>{v.text}</Text>
+              <Text style={{ fontSize: state.settings?.size || 10 }}>{v.text}</Text>
             </View> : null}
           </View>
         </View>)) : <ActivityIndicator size='large' color='purple'
@@ -195,14 +235,19 @@ const Speech = (props) => {
       </ScrollView>
       <KeyboardStickyView style={styles.keyboardView}>
         {fullwidth == false && <View style={{ display: 'flex', flexDirection: 'row' }}>
-          <TouchableOpacity onPress={() => setfrom(true)}>
-            <Text style={styles.txt}>{from || 'from'}</Text>
+          <MaterialIcons name='language'
+            onPress={() => setlanguageModal(true)}
+            //  style={styles.txt}
+            size={width * 0.09}
+            color='lightblue' />
+          {/* <TouchableOpacity onPress={() => { setfrom(true); setlanguageModal(true) }}>
+            <Text style={styles.txt}>{'from'}</Text>
           </TouchableOpacity>
           <MaterialIcons name='sync-alt' style={styles.txt} size={width * 0.05}
             color='gray' />
           <TouchableOpacity onPress={() => setTo(true)}>
             <Text style={styles.txt}>To</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>}
         <Animated.View style={[styles.animatedBox, anim]} >
           <TextInput
@@ -211,15 +256,20 @@ const Speech = (props) => {
             placeholder="Write something..."
             style={{
               ...styles.input,
-              width: fullwidth ? width * 0.85 : width * 0.6,
+              width: fullwidth ? width * 0.9 : width * 0.7,
             }}
           // onBlur={() => animationWidth('blur')}
           // onTouchStart={() => animationWidth('blur')}
           />
         </Animated.View>
+        <TouchableHighlight onPress={() => setopen(true)}>
+          <FontAwesome name='microphone'
+            style={{ marginLeft: 5 }}
+            color={'lightblue'} size={width * 0.1} />
+        </TouchableHighlight>
         <TouchableOpacity style={{}}
           onPress={send} >
-          <McIcon name='send-circle' color='blue' size={width * 0.14} />
+          <McIcon name='send-circle' color='lightblue' size={width * 0.14} />
         </TouchableOpacity>
       </KeyboardStickyView>
     </>
@@ -282,3 +332,17 @@ export default Speech;
 // 11. Flags of country next to country name in country list
 // 12. People can record themselves saying words so that it is added to the app vocabulary
 //13. just font size in settings
+
+// {!from || to ? <Picker
+//   style={styles.picker}
+//   selectedValue={languageCode}
+//   onValueChange={lang => { saveLanguage(lang) }} >
+//   {Object.keys(Languages).map((key, i) => {
+//     const arr = Object.values(Languages).filter(v => v[key])
+//     return (<View key={i}>
+//       <Image style={{width:30,height:20,}}source={{uri:arr[0].flag}} />
+//       <Text style={{borderWidth:2}}>{key}</Text>
+//       <Picker.Item key={i} label={key} value={key} />
+//     </View>)
+//   })}
+// </Picker> : null}

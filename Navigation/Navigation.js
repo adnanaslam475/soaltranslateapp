@@ -7,8 +7,7 @@ import Speech from "../Component/Sppech";
 import Vocabolary from "../screens/Vocabolary";
 import Settings from "../screens/Settings";
 import vocab_img from '../assets/vocab_img.jpg';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-// import { styles } from '../styles';
+import FontAwesome5 from 'react-native-vector-icons/MaterialIcons';
 import Vocabolaries from "../screens/Vocabolaries";
 
 const TranslatorStackNavigator = createStackNavigator();
@@ -17,21 +16,26 @@ const SettingsStackNavigator = createStackNavigator();
 const TabNavigator = createBottomTabNavigator();
 const { width, height } = Dimensions.get('window')
 
+
+const navStyles = {
+    headerStyle: { backgroundColor: '#91bad6' },
+    headerTransparent: false,
+    headerTitleAlign: 'center',
+    headerTitleContainerStyle: {
+        borderRadius: 30,
+    },
+    headerTitleStyle: {
+        color: 'white',
+        padding: 10,
+    }
+}
 const TranslatorStack = () => {
     return (
         <TranslatorStackNavigator.Navigator >
             <TranslatorStackNavigator.Screen name="speech" options={{
-                headerTintColor: 'blue',
+                ...navStyles,
                 headerTitle: 'Translation',
-                headerTransparent: false,
-                headerTitleAlign: 'center',
-                headerTitleContainerStyle: {
-                    borderRadius: 30,
-                },
-                headerTitleStyle: {
-                    color: 'blue',
-                    padding: 10
-                }
+
             }} component={Speech} />
         </TranslatorStackNavigator.Navigator>
     );
@@ -43,33 +47,15 @@ const VocabolaryStack = () => {
             <VocabStackNavigator.Screen name="vocab"
                 options={({ }) => {
                     return ({
-                        headerTintColor: 'blue',
+                        ...navStyles,
                         headerTitle: 'Languages',
-                        headerTransparent: false,
-                        headerTitleAlign: 'center',
-                        headerTitleContainerStyle: {
-                            borderRadius: 30,
-                        },
-                        headerTitleStyle: {
-                            color: 'blue',
-                            padding: 10
-                        }
                     })
                 }} component={Vocabolary} />
             <VocabStackNavigator.Screen name="vocablaries"
                 options={({ route }) => {
                     return ({
-                        headerTintColor: 'blue',
+                        ...navStyles,
                         headerTitle: route.params?.name,
-                        headerTransparent: false,
-                        headerTitleAlign: 'center',
-                        headerTitleContainerStyle: {
-                            borderRadius: 30,
-                        },
-                        headerTitleStyle: {
-                            color: 'blue',
-                            padding: 10
-                        }
                     })
                 }} component={Vocabolaries} />
         </VocabStackNavigator.Navigator>
@@ -80,26 +66,17 @@ const SettingStack = () => {
     return (
         <SettingsStackNavigator.Navigator >
             <SettingsStackNavigator.Screen name="settings" options={{
-                headerTintColor: 'blue',
+                ...navStyles,
                 headerTitle: 'Settings',
-                headerTransparent: false,
-                headerTitleAlign: 'center',
-                headerTitleContainerStyle: {
-                    borderRadius: 30,
-                },
-                headerTitleStyle: {
-                    color: 'blue',
-                    padding: 10
-                }
             }} component={Settings} />
         </SettingsStackNavigator.Navigator>
     );
 }
 
 
-const arr = [{ name: "language", icon: 'dumpster', stack: TranslatorStack },
-{ name: "vocabolary", icon: 'paper-plane', stack: SettingStack },
-{ name: "settings", icon: 'paper-plane', stack: VocabolaryStack }];
+const arr = [{ name: "language", icon: 'language', stack: VocabolaryStack },
+{ name: "vocabolary", icon: 'paper-plane', stack: TranslatorStack },
+{ name: "settings", icon: 'settings', stack: SettingStack }];
 
 
 const StackTabs = () => {

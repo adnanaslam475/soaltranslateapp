@@ -3,17 +3,28 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
+    err:{
+        color:'red',
+        padding: 0,
+        paddingLeft: 10,
+        marginTop: -20
+    },
+    loader: {
+        alignSelf:'center',
+        justifyContent:'center',
+        marginTop:height*0.4
+    },
     card: {
         width: width * 0.93,
         height: height * 0.1,
         backgroundColor: 'white',
         margin: 5,
         alignSelf: 'center',
-        paddingTop: height*0.03,
-        paddingLeft: height*0.03,
+        paddingTop: height * 0.03,
+        paddingLeft: height * 0.03,
     },
     cont: {
-        bottom: height*0.22,
+        bottom: height * 0.01,
         right: 0,
         position: 'absolute'
     },
@@ -23,7 +34,7 @@ export const styles = StyleSheet.create({
         right: 0,
 
     },
-    mpzero: { margin: 0, padding: 0 },
+    mpzero: { margin: 0, padding: 0, width: width * 0.7 },
     clr: { flexDirection: 'row', margin: 10 },
     icon: {
         width: width * 0.18, height: height * 0.08,
@@ -35,7 +46,7 @@ export const styles = StyleSheet.create({
     slider: { width: width * 0.9, alignSelf: 'center' },
     txtvw: {
         backgroundColor: 'lightgray',
-        borderRadius: width * 0.9,
+        borderRadius: width * 0.05,
         padding: 7,
         margin: 5,
         flexDirection: 'column'
@@ -65,8 +76,6 @@ export const styles = StyleSheet.create({
     },
     picker: {
         width: width * 0.8, height: 50,
-        borderWidth: 1,
-        borderRadius: 10, borderColor: 'gray'
     },
     vw: {
         display: 'flex', flexDirection: 'row',

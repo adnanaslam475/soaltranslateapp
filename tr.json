@@ -1,0 +1,18 @@
+{
+    "af": {
+        "name": "Afrikaans",
+        "flag": "https://cdn.britannica.com/27/4227-004-32423B42/Flag-South-Africa.jpg"
+    },
+    "sq": {
+        "name": "Albanian",
+        "flag": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Flag_of_Albania.svg/980px-Flag_of_Albania.svg.png"
+    },
+    "am": {
+        "name": "Amharic",
+        "flag": "https://cdn.britannica.com/12/12-004-A40EEB6F/Flag-Ethiopia.jpg"
+    },
+    "ar": {
+        "name": "Arabic",
+        "flag": ""
+    }
+}

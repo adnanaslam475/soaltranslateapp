@@ -16,22 +16,24 @@ import IonIcon from 'react-native-vector-icons/FontAwesome5';
 import { styles } from '../styles';
 
 
-
 const Settings = () => {
     const state = useSelector(s => s.reducer)
     const dispatch = useDispatch();
-    const colors = ['red', 'blue', 'green', 'yellow', 'black']
-    const [color, setcolor] = useState(state.color || '');
-    const [fontSize, setFontSize] = useState(state.size || 0);
+    const colors = ['rgb(254,180,21)', 'rgb(8,124,79)',
+        'rgb(226,55,48)', 'rgb(60,81,164)', 'black']
+    const [color, setcolor] = useState(state.settings?.color || '');
+    const [fontSize, setFontSize] = useState(state.settings?.size || 0);
 
 
     const save = () => {
         dispatch(saveSettings(color, fontSize))
+        ToastAndroid.show("saved successfully", ToastAndroid.SHORT);
     }
+
 
     return (
         <View>
-            <Text>Set Font size</Text>
+            <Text style={{ ...styles.txt }}>Set Font size</Text>
             <Slider
                 value={fontSize}
                 onValueChange={v => setFontSize(v)}
@@ -46,15 +48,14 @@ const Settings = () => {
                         name="circle"
                         size={20}
                         style={{ backgroundColor: 'black', borderRadius: 50 }}
-                    />
-                    ),
+                    />),
                 }}
             />
             <Text style={{
                 fontSize: fontSize ? fontSize : 20,
                 alignSelf: 'center'
             }} >Hello Translator</Text>
-            <Text>Set background</Text>
+            <Text style={{ ...styles.txt }}>Set background</Text>
             <View style={{ ...styles.clr }}>{colors.map((v, i) => <TouchableOpacity key={i}
                 onPress={() => setcolor(v)}
                 style={{
