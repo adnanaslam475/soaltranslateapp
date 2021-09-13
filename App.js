@@ -36,7 +36,7 @@ const App = () => {
         dis(getVocabolaries())
         // SplashScreen.hide();
     }, [])
-    // return <Navigation />
+    
     return <View>
         <Text>assssssssssssssss</Text>
         <CountryPicker
